@@ -1,4 +1,4 @@
-# DigitalBoost WordPress on AWS with EC2, EFS, RDS Database — Complete Setup Guide
+# DigitalBoost WordPress Website on AWS with EC2, EFS, RDS Database — Complete Setup Guide
 
 ---
 
@@ -15,11 +15,11 @@ DigitalBoost, a digital marketing agency, requires a scalable, secure, and cost-
 ## Architecture Diagram
 
 
-> `screenshots/architecture-diagram.png`
- `screenshots/architecture-diagram.png`
- `screenshots/architecture-diagram.png`
- `screenshots/architecture-diagram.png`
-> `screenshots/architecture-diagram.png`
+![Screenshot](screenshots/architectural-diagram4.png)
+![Screenshot](screenshots/architectural-diagram1.png)
+![Screenshot](screenshots/architectural-diagram2.png)
+![Screenshot](screenshots/architectural-diagram3.png)
+![Screenshot](screenshots/architectural-diagram.png)
 
 
 
@@ -56,9 +56,11 @@ The deployment consists of:
   - **Instance Type**: t2.micro (Free Tier eligible)
   - **Key Pair**: Create or select existing
   - **Security Group**: Configure as below
-
-> **Space for Screenshot:**  
-> `screenshots/ec2-launch-config.png`
+  - 
+![Screenshot](screenshots/ec22.png)
+## Create I am role for Devs You can name it after their role e.g
+![Screenshot](screenshots/IAM.png)
+![Screenshot](screenshots/poli.png)
 
 ### 1.2 Security Group Configuration
 
@@ -68,9 +70,12 @@ The deployment consists of:
 | HTTP   | TCP      | 80         | 0.0.0.0/0   | Web traffic       |
 | HTTPS  | TCP      | 443        | 0.0.0.0/0   | Secure web traffic|
 
-> **Space for Screenshot:**  
-> `screenshots/security-group-rules.png`
-
+![Screenshot](screenshots/subi1.png)
+![Screenshot](screenshots/sec.png)
+![Screenshot](screenshots/secssh.png)
+![Screenshot](screenshots/securityg.png)
+![Screenshot](screenshots/secg3306.png)
+![Screenshot](screenshots/securtyls.png)
 ### Step 1: VPC & Subnet Setup
 
 **Objective:** Create a resilient network foundation.
@@ -82,8 +87,24 @@ The deployment consists of:
 4. Add **2 private data subnets** (`10.0.4.0/24`, `10.0.5.0/24`)
 5. Attach Internet Gateway and set up public/private route tables
 
-> **Screenshot Placeholder:**  
-> `screenshots/vpc-setup.png`
+![Screenshot](screenshots/lao1.png)
+![Screenshot](screenshots/lao2.png)
+![Screenshot](screenshots/lao3.png)
+![Screenshot](screenshots/lao4.png)
+![Screenshot](screenshots/lao5.png)
+![Screenshot](screenshots/lao6.png)
+![Screenshot](screenshots/lao7.png)
+![Screenshot](screenshots/lao8.png)
+![Screenshot](screenshots/lao10.png)
+![Screenshot](screenshots/psub1.png)
+![Screenshot](screenshots/psub2.png)
+![Screenshot](screenshots/privsub1.png)
+
+![Screenshot](screenshots/privsub2.png)
+![Screenshot](screenshots/pdatasub1.png)
+![Screenshot](screenshots/pdatasub2.png)
+
+
 
 ---
 
@@ -97,8 +118,28 @@ The deployment consists of:
 3. Update private route tables to use NAT Gateway
 
 > **Screenshot Placeholder:**  
-> `screenshots/nat-gateway-setup.png`
-> `screenshots/bastion-host-setup.png`
+![Screenshot](screenshots/rtab.png)
+![Screenshot](screenshots/rtb4.png)
+![Screenshot](screenshots/rtb.png)
+![Screenshot](screenshots/privrtab.png)
+![Screenshot](screenshots/nat1.png)
+![Screenshot](screenshots/nat2.png)
+
+## Internet Gateway configurations
+![Screenshot](screenshots/igw.png)
+![Screenshot](screenshots/igw2.png)
+![Screenshot](screenshots/igw3.png)
+![Screenshot](screenshots/igwvpc.png)
+![Screenshot](screenshots/igwvpc2.png)
+
+### Route 53
+![Screenshot](screenshots/rt53.png)
+![Screenshot](screenshots/rt531.png)
+![Screenshot](screenshots/rt532.png)
+![Screenshot](screenshots/rt533.png)
+![Screenshot](screenshots/rt534.png)
+![Screenshot](screenshots/rt535.png)
+![Screenshot](screenshots/rt536.png)
 
 ---
 
@@ -113,8 +154,10 @@ The deployment consists of:
 | Database (RDS)    | 3306     | Webserver SG     | MySQL from web servers         |
 | EFS               | 2049     | Webserver SG     | NFS for shared storage         |
 
-> **Screenshot Placeholder:**  
-> `screenshots/security-group-architecture.png`
+##Screenshots
+![Screenshot](screenshots/architectural-diagram.png)
+![Screenshot](screenshots/architectural-diagram4.png)
+
 
 ---
 
@@ -127,8 +170,9 @@ The deployment consists of:
 2. Attach DB security group (allow 3306 only from webserver SG)
 3. Record endpoint for WordPress config
 
-> **Screenshot Placeholder:**  
-> `screenshots/rds-setup.png`
+###############################################################################################
+
+
 
 ---
 
@@ -143,11 +187,15 @@ The deployment consists of:
 4. Configure EC2 user-data to mount EFS on `/var/www/html`
 5. Ensure WordPress uploads/media are stored on EFS
 
-> **Screenshot Placeholder:**  
-> `screenshots/efs-setup.png`
+![Screenshot](screenshots/efs.png)
+![Screenshot](screenshots/efscreated.png)
+![Screenshot](screenshots/efscon.png)
+![Screenshot](screenshots/efs-manage.png)
+
+
 
 ---
-##Important ste
+##Important step
 **Objective:** Distribute client traffic across EC2 instances.
 
 **Steps:**
@@ -157,8 +205,22 @@ The deployment consists of:
 4. Set health check path (`/healthcheck.php`)
 5. Attach ALB SG
 
-> **Screenshot Placeholder:**  
-> `screenshots/alb-setup.png`
+![Screenshot](screenshots/albconfig.png)
+![Screenshot](screenshots/alb2.png)
+![Screenshot](screenshots/targ.png)
+![Screenshot](screenshots/targetg.png)
+![Screenshot](screenshots/tggrp.png)
+![Screenshot](screenshots/suctggp.png)
+![Screenshot](screenshots/updtg.png)
+![Screenshot](screenshots/lb.png)
+![Screenshot](screenshots/targe.png)
+![Screenshot](screenshots/targe.png)
+![Screenshot](screenshots/alp.png)
+
+## Attach Internet Gateway
+![Screenshot](screenshots/updatertb.png)
+![Screenshot](screenshots/attachigw.png)
+
 
 ---
 ---
@@ -181,11 +243,17 @@ p
    - Minimum 2 instances (HA)
    - Scaling policy based on CPU or ALB traffic
 
-> **Screenshot Placeholder:**  
-> `screenshots/ec2-setup.png`
-> `screenshots/apache-installation.png`
-> `screenshots/auto-scaling-group.png`
-
+![Screenshot](screenshots/template.png)
+![Screenshot](screenshots/templ.png)
+![Screenshot](screenshots/templl.png)  
+![Screenshot](screenshots/templsuc.png)
+![Screenshot](screenshots/autostep1.png)
+![Screenshot](screenshots/auto3.png)
+![Screenshot](screenshots/auto4.png)
+![Screenshot](screenshots/auto5.png)
+![Screenshot](screenshots/autorev.png)
+![Screenshot](screenshots/webserver.png)
+![Screenshot](screenshots/webservertemp.png)
 
 
 ## Step 2: Install and Configure Web Server
@@ -200,8 +268,9 @@ sudo systemctl enable httpd
 sudo systemctl status httpd
 ```
 
-> **Space for Screenshot:**  
-> `screenshots/apache-installation.png`
+![Screenshot](screenshots/sshin.png)
+![Screenshot](screenshots/vimin.png)
+![Screenshot](screenshots/shzfile1.png)
 
 ### 2.2 Test Web Server
 
@@ -213,11 +282,22 @@ sudo chmod 644 /var/www/html/test.*
 ```
 Test in browser:
 
-- [http://your-ec2-ip/test.html](http://your-ec2-ip/test.html)
-- [http://your-ec2-ip/test.php](http://your-ec2-ip/test.php)
+- [http://your-ec2-ip/test.html](http://34.200.144.96/test.html)
+- [http://your-ec2-ip/test.php](http://34.200.144.96/test.php)
 
-> **Space for Screenshot:**  
-> `screenshots/web-server-test.png`
+
+![Screenshot](screenshots/rec.png)
+![Screenshot](screenshots/workdoc.png)
+![Screenshot](screenshots/found.png)
+##Troubleshoot
+- [http://your-ec2-ip/test.php](http://34.200.144.96/readme.html)
+![Screenshot](screenshots/runshh.png)
+![Screenshot](screenshots/sussh.png)
+![Screenshot](screenshots/grssh.png)
+![Screenshot](screenshots/wpressset.png)
+![Screenshot](screenshots/configuration.png)
+![Screenshot](screenshots/scripted.png)
+
 
 ---
 
@@ -239,8 +319,12 @@ Test in browser:
 - Public Access: Yes (for demo)
 - Security Group: Create new
 
-> **Space for Screenshot:**  
-> `screenshots/rds-configuration.png`
+> **Screenshot Placeholder:**  
+![Screenshot](screenshots/db.png)
+![Screenshot](screenshots/db2.png)
+![Screenshot](screenshots/db3.png)
+![Screenshot](screenshots/bd4.png)
+![Screenshot](screenshots/dbcreate.png)
 
 ### 3.2 RDS Security Group
 
@@ -248,8 +332,10 @@ Test in browser:
 |--------------|----------|------------|--------------------|------------------------------|
 | MySQL/Aurora | TCP      | 3306       | EC2-Security-Group | Database access from EC2     |
 
-> **Space for Screenshot:**  
-> `screenshots/database-creation.png`
+![Screenshot](screenshots/securityg.png)
+![Screenshot](screenshots/secssh.png)
+
+
 
 ### 3.3 Create WordPress Database and User
 
@@ -274,10 +360,23 @@ EXIT;
    - Security salts from WordPress API
 3. Complete installation via ALB DNS/domain in browser
 
-> **Screenshot Placeholder:**  
-> `screenshots/wordpress-installation.png`
-> `screenshots/wp-config-setup.png`
+![Screenshot](screenshots/.png)
+![Screenshot](screenshots/.png)
+![Screenshot](screenshots/.png)
+### Autoscaling test, Alarm metrics and visual, hosted zone and testing
+![Screenshot](screenshots/braedcrumbs.png)
+![Screenshot](screenshots/scaling.png)
+![Screenshot](screenshots/iptr.png)
+![Screenshot](screenshots/insid.png)
+![Screenshot](screenshots/inst.png)
 
+![Screenshot](screenshots/insav.png)
+![Screenshot](screenshots/trbsh.png)
+![Screenshot](screenshots/alarm.png)
+![Screenshot](screenshots/alam.png)
+![Screenshot](screenshots/autoscaled.png)
+
+![Screenshot](screenshots/metrics.png)
 
 ### 4.1 Create Database Test Script
 
@@ -305,9 +404,9 @@ sudo chmod 644 /var/www/html/db-test.php
 
 - Visit: `http://your-ec2-ip/db-test.php`
 
-> **Space for Screenshot:**  
-> `screenshots/database-creation.png`
-
+![Screenshot](screenshots/.png)
+![Screenshot](screenshots/.png)
+![Screenshot](screenshots/.png)
 ---
 
 ## Step 5: WordPress Installation
@@ -322,9 +421,9 @@ sudo cp -r wordpress/* /var/www/html/
 sudo chown -R apache:apache /var/www/html/
 sudo chmod -R 755 /var/www/html/
 ```
-
-> **Space for Screenshot:**  
-> `screenshots/wordpress-installation.png`
+![Screenshot](screenshots/.png)
+![Screenshot](screenshots/.png)
+![Screenshot](screenshots/.png)
 
 ### 5.2 Configure WordPress
 
@@ -379,10 +478,19 @@ sudo yum install -y php
 sudo systemctl restart httpd
 ```
 
-> **Space for Screenshot:**  
-> `screenshots/troubleshooting.png`
+![Screenshot](screenshots/prroo.png)
+![Screenshot](screenshots/proo.png)
+![Screenshot](screenshots/phpp.png)
+![Screenshot](screenshots/mu-php.png)
+![Screenshot](screenshots/mu-php.png)
 
 ### 6.2 Performance Optimization
+### Data Base
+![Screenshot](screenshots/RDSCONNECT.png)
+![Screenshot](screenshots/RDS.png)
+![Screenshot](screenshots/dbcon.png)
+![Screenshot](screenshots/fil.png)
+![Screenshot](screenshots/found.png)
 
 Append to Apache config for performance and security:
 
@@ -421,9 +529,13 @@ curl http://localhost/db-test.php
 echo "=== Testing WordPress ==="
 curl -I http://localhost/
 ```
+![Screenshot](screenshots/gt53.png)
+![Screenshot](screenshots/gt543.png)
+![Screenshot](screenshots/gt532.png)
+![Screenshot](screenshots/connne.png)
+![Screenshot](screenshots/htmlch.png)
+![Screenshot](screenshots/charss.png)
 
-> **Space for Screenshot:**  
-> `screenshots/final-testing.png`
 
 ### 7.2 WordPress Setup Completion
 
@@ -436,8 +548,9 @@ curl -I http://localhost/
 
 Login to WordPress admin panel and customize your site.
 
-> **Space for Screenshot:**  
-> `screenshots/wordpress-dashboard.png`
+![Screenshot](screenshots/ggoo.png)
+![Screenshot](screenshots/lastt.png)
+![Screenshot](screenshots/itworks.png)
 
 ---
 
