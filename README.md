@@ -1,32 +1,47 @@
-# WordPress on AWS with EC2, EFS, RDS Database — Complete Setup Guide
+# DigitalBoost WordPress on AWS with EC2, EFS, RDS Database — Complete Setup Guide
 
 ---
 
 ## Project Overview
 
-This guide demonstrates how to deploy a WordPress website on Amazon Web Services (AWS) using EC2 for hosting and RDS for database management. The walkthrough includes security best practices, database connectivity, and web server optimization for a robust, scalable solution.
+## Project Scenario
+
+DigitalBoost, a digital marketing agency, requires a scalable, secure, and cost-effective WordPress solution that can handle client traffic and integrate seamlessly with existing infrastructure. This guide walks you through designing and deploying a robust, multi-AZ WordPress stack on AWS using best practices for networking, compute, storage, and security.
+
+
 
 ---
 
 ## Architecture Diagram
 
-> **Space for Screenshot:**  
+
 > `screenshots/architecture-diagram.png`
+ `screenshots/architecture-diagram.png`
+ `screenshots/architecture-diagram.png`
+ `screenshots/architecture-diagram.png`
+> `screenshots/architecture-diagram.png`
+
+
+
 
 The deployment consists of:
 
-- **EC2 Instance**: Amazon Linux 2 hosting Apache and PHP
-- **RDS Database**: Managed MySQL for WordPress data
-- **Security Groups**: Network access controls for EC2 and RDS
-- **VPC**: Virtual Private Cloud for network isolation
+- **VPC** (multi-AZ, public/private subnets)
+- **Internet Gateway, NAT Gateway, Bastion Host** (public)
+- **Application Load Balancer (ALB)**
+- **EC2 Web Servers** (private, auto scaling)
+- **Amazon RDS (MySQL)** (private)
+- **Amazon EFS** (shared storage for web servers)
+- **Route 53** (domain registration & DNS)
+- **Security Groups** (detailed below)
 
----
+
 
 ## Prerequisites
 
-- AWS Account with permissions for EC2, RDS, VPC
+- AWS Account with permissions for EC2, RDS, VPC 
 - Basic Linux command line knowledge
-- Familiarity with web servers and databases
+- Familiarity with web servers and databases AWS
 
 ---
 
@@ -56,17 +71,122 @@ The deployment consists of:
 > **Space for Screenshot:**  
 > `screenshots/security-group-rules.png`
 
-### 1.3 Connect to EC2 Instance
+### Step 1: VPC & Subnet Setup
 
-```sh
-ssh -i "your-key.pem" ec2-user@your-ec2-public-ip
-sudo yum update -y
-```
+**Objective:** Create a resilient network foundation.
 
-> **Space for Screenshot:**  
-> `screenshots/ssh-connection.png`
+**Steps:**
+1. Create VPC (`10.0.0.0/16`) in `us-east-1`
+2. Add **2 public subnets** (`10.0.0.0/24`, `10.0.2.0/24`) in different AZs
+3. Add **2 private app subnets** (`10.0.1.0/24`, `10.0.3.0/24`)
+4. Add **2 private data subnets** (`10.0.4.0/24`, `10.0.5.0/24`)
+5. Attach Internet Gateway and set up public/private route tables
+
+> **Screenshot Placeholder:**  
+> `screenshots/vpc-setup.png`
 
 ---
+
+## Step 2: NAT Gateway & Bastion Host
+
+**Objective:** Securely enable private subnet internet access; admin access via Bastion Host.
+
+**Steps:**
+1. Deploy NAT Gateway in public subnet for outbound internet from private subnets
+2. Create Bastion Host EC2 in public subnet (SSH access restricted to your IP)
+3. Update private route tables to use NAT Gateway
+
+> **Screenshot Placeholder:**  
+> `screenshots/nat-gateway-setup.png`
+> `screenshots/bastion-host-setup.png`
+
+---
+
+## Step 3: Security Group Architecture
+
+| Component         | Port(s)  | Source           | Purpose                        |
+|-------------------|----------|------------------|--------------------------------|
+| ALB               | 80, 443  | 0.0.0.0/0        | Public web traffic             |
+| Bastion Host      | 22       | Your IP          | Secure SSH admin access        |
+| Webserver         | 80, 443  | ALB SG           | App traffic from ALB           |
+| Webserver         | 22       | Bastion SG       | SSH from Bastion               |
+| Database (RDS)    | 3306     | Webserver SG     | MySQL from web servers         |
+| EFS               | 2049     | Webserver SG     | NFS for shared storage         |
+
+> **Screenshot Placeholder:**  
+> `screenshots/security-group-architecture.png`
+
+---
+
+## Step 4: Amazon RDS (MySQL) Setup
+
+**Objective:** Managed, scalable database with security isolation.
+
+**Steps:**
+1. Create RDS MySQL instance in private data subnet (multi-AZ, db.t3.micro/free tier if eligible)
+2. Attach DB security group (allow 3306 only from webserver SG)
+3. Record endpoint for WordPress config
+
+> **Screenshot Placeholder:**  
+> `screenshots/rds-setup.png`
+
+---
+
+## Step 5: Amazon EFS Setup
+
+**Objective:** Scalable, shared file storage for all EC2 web servers.
+
+**Steps:**
+1. Create EFS file system
+2. Add mount targets in both private app subnets (AZ1 + AZ2)
+3. Attach EFS SG (allow 2049 from webserver SG)
+4. Configure EC2 user-data to mount EFS on `/var/www/html`
+5. Ensure WordPress uploads/media are stored on EFS
+
+> **Screenshot Placeholder:**  
+> `screenshots/efs-setup.png`
+
+---
+##Important ste
+**Objective:** Distribute client traffic across EC2 instances.
+
+**Steps:**
+1. Create ALB in public subnets
+2. Set up listeners for HTTP/HTTPS
+3. Create target group for EC2 instances
+4. Set health check path (`/healthcheck.php`)
+5. Attach ALB SG
+
+> **Screenshot Placeholder:**  
+> `screenshots/alb-setup.png`
+
+---
+---
+
+
+
+p
+## Step 6: EC2 Launch Template & Auto Scaling Group
+
+**Objective:** Highly available, elastic WordPress web server layer.
+
+**Steps:**
+1. Build EC2 launch template:
+   - Amazon Linux 2
+   - Install Apache, PHP, required modules
+   - Mount EFS (user-data script)
+   - Deploy WordPress files
+2. Create Auto Scaling Group:
+   - Launch in both private app subnets
+   - Minimum 2 instances (HA)
+   - Scaling policy based on CPU or ALB traffic
+
+> **Screenshot Placeholder:**  
+> `screenshots/ec2-setup.png`
+> `screenshots/apache-installation.png`
+> `screenshots/auto-scaling-group.png`
+
+
 
 ## Step 2: Install and Configure Web Server
 
@@ -146,6 +266,18 @@ EXIT;
 ---
 
 ## Step 4: Test Database Connectivity
+1. Copy WordPress files to `/var/www/html` (EFS mount)
+2. Create and configure `wp-config.php`:
+   - DB host: RDS endpoint
+   - DB user: `wpuser`
+   - DB password: strong password
+   - Security salts from WordPress API
+3. Complete installation via ALB DNS/domain in browser
+
+> **Screenshot Placeholder:**  
+> `screenshots/wordpress-installation.png`
+> `screenshots/wp-config-setup.png`
+
 
 ### 4.1 Create Database Test Script
 
@@ -313,9 +445,15 @@ Login to WordPress admin panel and customize your site.
 
 ### 8.1 Security Best Practices
 
-- **Database**: Separate user, strong password, private subnet in production
-- **Web Server**: Regular updates, secure file permissions, security headers
-- **Network**: Restrictive security groups, SSH keys, HTTPS ready
+- Private subnets for web and DB servers
+- NAT Gateway for secure outbound traffic
+- Bastion Host for SSH (no direct EC2 access)
+- Principle of least privilege for SGs
+- RDS not publicly accessible
+- EFS only accessible to web servers
+- Regular updates, secure file permissions
+- Security headers in Apache config
+- HTTPS via ALB (add ACM/Let's Encrypt certificate as enhancement)
 
 ### 8.2 Monitoring and Maintenance
 
@@ -336,23 +474,30 @@ wordpress-aws-project/
 ├── README.md
 ├── screenshots/
 │   ├── architecture-diagram.png
-│   ├── ec2-launch-config.png
-│   ├── security-group-rules.png
-│   ├── ssh-connection.png
+│   ├── vpc-setup.png
+│   ├── nat-gateway-setup.png
+│   ├── bastion-host-setup.png
+│   ├── security-group-architecture.png
+│   ├── rds-setup.png
+│   ├── efs-setup.png
+│   ├── ec2-setup.png
 │   ├── apache-installation.png
-│   ├── web-server-test.png
-│   ├── rds-configuration.png
-│   ├── database-creation.png
+│   ├── auto-scaling-group.png
+│   ├── alb-setup.png
+│   ├── route53-setup.png
 │   ├── wordpress-installation.png
-│   └── final-testing.png
+│   ├── wp-config-setup.png
+│   ├── final-testing.png
+│   └── wordpress-dashboard.png
 ├── scripts/
 │   ├── install-lamp.sh
 │   ├── setup-database.sh
-│   └── deploy-wordpress.sh
+│   ├── deploy-wordpress.sh
 └── config/
     ├── httpd.conf
     └── wp-config-template.php
 ```
+
 
 ---
 
